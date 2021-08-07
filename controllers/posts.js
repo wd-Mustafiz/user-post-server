@@ -12,7 +12,7 @@ const getPosts = async (req,res) => {
 
 const createPost = async (req,res) => {
     const post = req.body
-    const newPost = new PostMessege(post)
+    const newPost = new PostMessege({...post , creator: req.userId , createdAt: new Date().toISOString()})
     try {
         await newPost.save()
         res.status(201).json(newPost)
@@ -51,11 +51,18 @@ const deletePost = async (req,res) => {
 }
 const likePost =  async (req,res) => {
     const {id} = req.params
-    console.log(id);
+    
     try {
+        if(!req.userId) return res.json("you can't like the post")
         const existPost = await PostMessege.findById({_id:id})
         
-        const updateLikePost =  await PostMessege.findByIdAndUpdate({_id:id} , {likeCount: existPost.likeCount + 1} , {new:true})
+        const index = existPost.likes.findIndex((id) => id === String(req.userId))
+        if(index === -1){
+            existPost.likes.push(req.userId)
+        }else{
+            existPost.likes = existPost.likes.filter(id => id !== req.userId)
+        }
+        const updateLikePost =  await PostMessege.findByIdAndUpdate({_id:id} , existPost , {new:true})
         return res.status(203).json(updateLikePost)
     } catch (error) {
         console.log(error);

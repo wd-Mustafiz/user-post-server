@@ -2,13 +2,11 @@ const mongoose = require('mongoose')
 const postMessegeSchema = new mongoose.Schema({
     title: String,
     messege:String,
+    name:String,
     creator:String,
     tags:[String],
     selectedFile:String,
-    likeCount:{
-        type:Number,
-        default:0
-    },
+    likes: { type: [String], default: [] },
     createdAt:{
         type:Date,
         default:new Date()
